@@ -1,8 +1,8 @@
 extends CharacterBody3D
+class_name Player
 
 @export_subgroup("Properties")
 @export var movement_speed = 5
-@export var jump_strength = 7
 
 @export_subgroup("Weapons")
 @export var weapons: Array[Weapon] = []
@@ -20,12 +20,8 @@ var input: Vector3
 var input_mouse: Vector2
 
 var health:int = 100
-var gravity := 0.0
 
 var previously_floored := false
-
-var jump_single := true
-var jump_double := true
 
 var container_offset = Vector3(1.2, -1.1, -2.75)
 
@@ -39,12 +35,14 @@ signal health_updated
 @onready var container = $Head/Camera/SubViewportContainer/SubViewport/CameraItem/Container
 @onready var sound_footsteps = $SoundFootsteps
 @onready var blaster_cooldown = $Cooldown
-@onready var gravity_influence = $GravityInfluence
+@onready var gravity_influence:= $GravityInfluence as GravityInfluence
 
 @export var crosshair:TextureRect
 
 
 func _ready():
+	gravity_influence.init(self)
+	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED	
 	initiate_change_weapon(weapon_index)
 
@@ -57,7 +55,7 @@ func _physics_process(delta):
 	var applied_velocity: Vector3
 	movement_velocity = transform.basis * movement_velocity # Move forward
 	applied_velocity = velocity.lerp(movement_velocity, delta * 10)
-	applied_velocity.y = -gravity
+	applied_velocity.y = -gravity_influence.get_influence()
 	velocity = applied_velocity
 	move_and_slide()
 	
@@ -76,7 +74,7 @@ func _physics_process(delta):
 	# Landing after jump or falling
 	camera.position.y = lerp(camera.position.y, 0.0, delta * 5)
 	
-	if is_on_floor() and gravity > 1 and !previously_floored: # Landed
+	if is_on_floor() and gravity_influence.get_influence() > 1 and !previously_floored: # Landed
 		Audio.play("sounds/land.ogg")
 		camera.position.y = -0.1
 	previously_floored = is_on_floor()
@@ -117,16 +115,7 @@ func handle_controls(_delta):
 		action_shoot(_delta)
 	
 	if Input.is_action_just_pressed("jump"):
-		
-		if jump_single or jump_double:
-			Audio.play("sounds/jump_a.ogg, sounds/jump_b.ogg, sounds/jump_c.ogg")
-		
-		if jump_double:
-			
-			gravity = -jump_strength
-			jump_double = false
-			
-		if(jump_single): action_jump()
+		gravity_influence.jump()
 		
 	# Weapon switching
 	action_weapon_toggle()
@@ -141,7 +130,7 @@ func action_shoot(delta):
 	var test: Vector3 = camera.transform.basis.z
 	print(str(test))
 	movement_velocity += Vector3(0, test.y * weapon.knockback, test.z * weapon.knockback) # Knockback
-	gravity -= test.y * weapon.knockback * delta * 10
+#	gravity -= test.y * weapon.knockback * delta * 10
 	print(str(movement_velocity))
 	camera.rotation.x += 0.025 # Knockback of camera
 	
@@ -187,22 +176,11 @@ func action_shoot(delta):
 
 
 func action_jump():
-	
-	gravity = -jump_strength
-	
-	jump_single = false;
-	jump_double = true;
+	gravity_influence.jump()
 
 
 func handle_gravity(delta):
-	# Handle gravity
-	gravity += 20 * delta
-	
-	if gravity > 0 and is_on_floor():
-		
-		jump_single = true
-		gravity = 0
-	print(gravity)
+	gravity_influence.handle_gravity(delta)
 
 
 func action_weapon_toggle():

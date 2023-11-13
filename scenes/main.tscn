@@ -22,6 +22,7 @@ outline_color = Color(0, 0, 0, 0.470588)
 environment = ExtResource("1_q8fpv")
 
 [node name="Player" parent="." node_paths=PackedStringArray("crosshair") instance=ExtResource("2_elriq")]
+movement_speed = 5
 crosshair = NodePath("../HUD/Crosshair")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
