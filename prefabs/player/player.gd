@@ -36,6 +36,7 @@ signal health_updated
 @onready var sound_footsteps = $SoundFootsteps
 @onready var blaster_cooldown = $Cooldown
 @onready var gravity_influence:= $GravityInfluence as GravityInfluence
+@onready var knockback_influence:= $KnockbackInfluence as KnockbackInfluence
 
 @export var crosshair:TextureRect
 
@@ -50,12 +51,22 @@ func _ready():
 func _physics_process(delta):
 	handle_controls(delta)
 	handle_gravity(delta)
+	handle_knockback(delta)
 	
 	# Movement
 	var applied_velocity: Vector3
 	movement_velocity = transform.basis * movement_velocity # Move forward
-	applied_velocity = velocity.lerp(movement_velocity, delta * 10)
-	applied_velocity.y = -gravity_influence.get_influence()
+	var knockback_velocity = knockback_influence.get_influence()
+	
+#	applied_velocity = velocity.lerp(movement_velocity + knockback_velocity, delta * 10)
+	applied_velocity = movement_velocity + knockback_velocity
+	
+	var gravity_velocity = gravity_influence.get_influence()
+#	if (gravity_velocity < 0 && knockback_velocity.y > 0):
+#		gravity_velocity = clampf(gravity_velocity, 0, 10000)
+	
+	applied_velocity.y += gravity_velocity
+#	applied_velocity += knockback_velocity
 	velocity = applied_velocity
 	move_and_slide()
 	
@@ -74,7 +85,7 @@ func _physics_process(delta):
 	# Landing after jump or falling
 	camera.position.y = lerp(camera.position.y, 0.0, delta * 5)
 	
-	if is_on_floor() and gravity_influence.get_influence() > 1 and !previously_floored: # Landed
+	if is_on_floor() and gravity_influence.get_influence() < 1 and !previously_floored: # Landed
 		Audio.play("sounds/land.ogg")
 		camera.position.y = -0.1
 	previously_floored = is_on_floor()
@@ -124,14 +135,13 @@ func handle_controls(_delta):
 func action_shoot(delta):
 	if !blaster_cooldown.is_stopped(): return # Cooldown for shooting
 	
-	Audio.play(weapon.sound_shoot)
+	if weapon:
+		Audio.play(weapon.sound_shoot)
 	
 	container.position.z += 0.25 # Knockback of weapon visual
-	var test: Vector3 = camera.transform.basis.z
-	print(str(test))
-	movement_velocity += Vector3(0, test.y * weapon.knockback, test.z * weapon.knockback) # Knockback
-#	gravity -= test.y * weapon.knockback * delta * 10
-	print(str(movement_velocity))
+	var test: Vector3 = camera.global_transform.basis.z
+	knockback_influence.add_influence(test, weapon.knockback)
+
 	camera.rotation.x += 0.025 # Knockback of camera
 	
 	# Set muzzle flash position, play animation
@@ -181,6 +191,11 @@ func action_jump():
 
 func handle_gravity(delta):
 	gravity_influence.handle_gravity(delta)
+	
+
+
+func handle_knockback(delta):
+	knockback_influence.handle_influence(delta)
 
 
 func action_weapon_toggle():

@@ -22,7 +22,6 @@ outline_color = Color(0, 0, 0, 0.470588)
 environment = ExtResource("1_q8fpv")
 
 [node name="Player" parent="." node_paths=PackedStringArray("crosshair") instance=ExtResource("2_elriq")]
-movement_speed = 5
 crosshair = NodePath("../HUD/Crosshair")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
@@ -105,6 +104,9 @@ transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 
 
 [node name="platform-large-grass" parent="Level" instance=ExtResource("7_wggef")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="platform-large-grass6" parent="Level" instance=ExtResource("7_wggef")]
+transform = Transform3D(19.7105, 0, 0, 0, 1.00572, 0, 0, 0, 19.7105, 0, -1.63693, 0)
 
 [node name="platform-large-grass2" parent="Level" instance=ExtResource("7_wggef")]
 transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, -2, 0.5, -6)

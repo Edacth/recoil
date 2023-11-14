@@ -6,43 +6,34 @@ class_name GravityInfluence
 
 var player: Player
 
-var gravity: float = 0.0
-var jump_single := true
-var jump_double := true
+var influence: float = 0.0
+var jumps_remaining: int = 2
+
+var downward_pull := 15
 
 
 func init(player: Player):
 	self.player = player
 
 
-
 func handle_gravity(delta):
-	# Handle gravity
-	gravity += 20 * delta
+	influence -= downward_pull * delta
+	influence = clamp(influence, -6, 10000)
 	
-	if gravity > 0 and player.is_on_floor():
+	if influence < 0 and player.is_on_floor():
+		jumps_remaining = 2
+		influence = 0
 		
-		jump_single = true
-		gravity = 0
-	print(gravity)
+#	print(influence)
 
 
 func jump():
-	if jump_single or jump_double:
+	if jumps_remaining > 0:
 		Audio.play("sounds/jump_a.ogg, sounds/jump_b.ogg, sounds/jump_c.ogg")
 		
-		if jump_double:
-			
-			gravity = -jump_strength
-			jump_double = false
-			
-		if(jump_single): 
-			gravity = -jump_strength
-	
-			jump_single = false;
-			jump_double = true;
-	
+		influence = jump_strength
+		jumps_remaining -= 1
 
 
 func get_influence() -> float:
-	return gravity
+	return influence
