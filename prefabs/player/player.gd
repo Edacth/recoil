@@ -1,7 +1,7 @@
 extends CharacterBody3D
 class_name Player
 
-@export_subgroup("Properties")
+#@export_subgroup("Properties")
 @export var movement_speed = 5
 
 @export_subgroup("Weapons")
@@ -37,12 +37,14 @@ signal health_updated
 @onready var blaster_cooldown = $Cooldown
 @onready var gravity_influence:= $GravityInfluence as GravityInfluence
 @onready var knockback_influence:= $KnockbackInfluence as KnockbackInfluence
+@onready var drag_cloak := $DragCloak as DragCloak
 
 @export var crosshair:TextureRect
 
 
 func _ready():
-	gravity_influence.init(self)
+	gravity_influence.init(self, drag_cloak)
+	knockback_influence.init(drag_cloak)
 	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED	
 	initiate_change_weapon(weapon_index)
@@ -62,8 +64,7 @@ func _physics_process(delta):
 	applied_velocity = movement_velocity + knockback_velocity
 	
 	var gravity_velocity = gravity_influence.get_influence()
-#	if (gravity_velocity < 0 && knockback_velocity.y > 0):
-#		gravity_velocity = clampf(gravity_velocity, 0, 10000)
+	
 	
 	applied_velocity.y += gravity_velocity
 #	applied_velocity += knockback_velocity
@@ -130,6 +131,12 @@ func handle_controls(_delta):
 		
 	# Weapon switching
 	action_weapon_toggle()
+	
+	if Input.is_action_just_pressed("drag_cloak"):
+		drag_cloak.activate()
+		
+	if Input.is_action_just_released("drag_cloak"):
+		drag_cloak.deactivate()
 
 
 func action_shoot(delta):

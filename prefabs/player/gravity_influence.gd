@@ -5,6 +5,7 @@ class_name GravityInfluence
 @export var jump_strength = 7
 
 var player: Player
+var drag_cloak: DragCloak
 
 var influence: float = 0.0
 var jumps_remaining: int = 2
@@ -12,13 +13,14 @@ var jumps_remaining: int = 2
 var downward_pull := 15
 
 
-func init(player: Player):
+func init(player: Player, drag_cloak:DragCloak):
 	self.player = player
+	self.drag_cloak = drag_cloak
 
 
 func handle_gravity(delta):
 	influence -= downward_pull * delta
-	influence = clamp(influence, -6, 10000)
+	influence = clamp(influence, -8, 10000)
 	
 	if influence < 0 and player.is_on_floor():
 		jumps_remaining = 2
@@ -36,4 +38,4 @@ func jump():
 
 
 func get_influence() -> float:
-	return influence
+	return drag_cloak.applyGravityDragIfActive(influence)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dl2ed4gkybggf"]
+[gd_scene load_steps=12 format=3 uid="uid://dl2ed4gkybggf"]
 
 [ext_resource type="Script" path="res://prefabs/player/player.gd" id="1_ickym"]
 [ext_resource type="Resource" uid="uid://c56y8pqoyk15f" path="res://weapons/blaster.tres" id="2_4fqd4"]
@@ -8,6 +8,8 @@
 [ext_resource type="AudioStream" uid="uid://cydjn1ct3hps2" path="res://sounds/walking.ogg" id="6_2ghku"]
 [ext_resource type="Script" path="res://prefabs/player/gravity_influence.gd" id="7_q2qma"]
 [ext_resource type="Script" path="res://prefabs/player/knockback_influence.gd" id="8_aagoc"]
+[ext_resource type="Script" path="res://prefabs/player/drag_cloak.gd" id="9_o21ly"]
+[ext_resource type="AudioStream" uid="uid://jhdqyafx5w62" path="res://sounds/Wind.ogg" id="10_xudqs"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_gdq8c"]
 radius = 0.3
@@ -83,3 +85,9 @@ script = ExtResource("7_q2qma")
 
 [node name="KnockbackInfluence" type="Node" parent="."]
 script = ExtResource("8_aagoc")
+
+[node name="DragCloak" type="Node" parent="."]
+script = ExtResource("9_o21ly")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="DragCloak"]
+stream = ExtResource("10_xudqs")
